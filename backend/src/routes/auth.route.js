@@ -1,11 +1,9 @@
 import { Router } from "express";
+import { signup } from "../controllers/auth.controller.js";
 const router = Router();
 
 //signUp 
-router.post("/signup" ,(req,res)=>{
-    res.json({message: "SignUp route hit"})
-})
-
+router.post("/signup" , signup);
 //login
 router.post("/login" ,(req , res)=>{
     res.json({message: "Login route hit"})
