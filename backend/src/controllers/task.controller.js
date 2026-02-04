@@ -1,23 +1,46 @@
 import Task from "../models/task.model.js";
+import remainderQueue from "../queues/remainder.queue.js";
 
 // CREATE TASK
 export const createTask = async (req, res, next) => {
   try {
-    const { title, description, intent, priority } = req.body;
+    // 1️⃣ Extract all required fields (deadline was missing before)
+    const { title, description, intent, priority, deadline } = req.body;
 
+    // 2️⃣ Basic validation
     if (!title) {
       return res.status(400).json({ message: "Title is required" });
     }
 
+    // 3️⃣ Create task in DB (source of truth)
     const task = await Task.create({
       title,
       description,
       intent,
       priority,
-      user: req.user._id, // from auth middleware
+      deadline,
+      user: req.user._id, // injected by auth middleware
     });
 
-    res.status(201).json({
+    // 4️⃣ Schedule reminder ASYNC (non-blocking)
+    if (deadline) {
+      const delay = new Date(deadline).getTime() - Date.now();
+
+      if (delay > 0) {
+        await remainderQueue.add(
+          "task-remainder",
+          {
+            userId: req.user._id,
+            taskId: task._id,
+            title: task.title,
+          },
+          { delay }
+        );
+      }
+    }
+
+    // 5️⃣ Respond AFTER everything important is done
+    return res.status(201).json({
       message: "Task created",
       task,
     });
@@ -25,6 +48,7 @@ export const createTask = async (req, res, next) => {
     next(error);
   }
 };
+
 
 // GET MY TASKS
 export const getMyTasks = async (req, res, next) => {
@@ -95,4 +119,3 @@ export const deleteTask = async (req, res, next) => {
     next(error);
   }
 };
-

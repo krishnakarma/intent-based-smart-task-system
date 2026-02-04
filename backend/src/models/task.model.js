@@ -11,12 +11,15 @@ const taskSchema = new mongoose.Schema(
       type: String,
     },
     intent: {
-      type: String, // focus, deep-focus, low-energy etc
+      type: String,
       default: "general",
     },
     priority: {
-      type: Number, // 1 (low) → 5 (high)
+      type: Number,
       default: 3,
+    },
+    deadline: {
+      type: Date,   // ✅ ADD THIS
     },
     isCompleted: {
       type: Boolean,

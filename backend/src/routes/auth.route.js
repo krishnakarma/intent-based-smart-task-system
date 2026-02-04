@@ -1,13 +1,18 @@
 import { Router } from "express";
 import { login , signup } from "../controllers/auth.controller.js";
+import rateLimit  from "../middleware/rateLimiter.middleware.js"
 const router = Router();
 
+//RateLimiter
+const authLimiter = rateLimit({
+  windowSeconds: 60,
+  maxRequests: 5,
+  keyPrefix: "auth",
+});
 //signUp 
 router.post("/signup" , signup);
-router.post("/login" , login);
 //login
-router.post("/login" ,(req , res)=>{
-    res.json({message: "Login route hit"})
-})
+router.post("/login" , login);
+
 
 export default router;
