@@ -7,6 +7,8 @@ import {
     deleteTask,
 } from "../controllers/task.controller.js"
 import rateLimit from "../middleware/rateLimiter.middleware.js"
+import { validate } from "../middleware/validate.middleware.js";
+import { createTaskSchema , updateTaskSchema } from "../validations/task.validation.js";
 const router = Router();
 
 const taskLimiter = rateLimit({
@@ -15,9 +17,9 @@ const taskLimiter = rateLimit({
   keyPrefix: "tasks",
 });
 // protected routes
-router.post("/", authMiddleware, taskLimiter, createTask);
+router.post("/", authMiddleware , taskLimiter ,validate(createTaskSchema), createTask);
 router.get("/", authMiddleware, taskLimiter, getMyTasks);
-router.put("/:id", authMiddleware, taskLimiter, updateTask);
+router.put("/:id", authMiddleware, taskLimiter, validate(updateTaskSchema), updateTask);
 router.delete("/:id", authMiddleware, taskLimiter, deleteTask);
 
 export default router;
